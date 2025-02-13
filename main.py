@@ -28,13 +28,13 @@ def display_menu():
     print("0️⃣ Exit")
 
 
-def create_account(user_id: int, user: str, f_name: str, l_name: str) -> (list, int, list, int):
+def create_account(user_id: int, user: str, f_name: str, l_name: str) -> (list, float, list, float):
     """Create a new account."""
 
     new_account = [user_id, user, f_name, l_name]  # Create new list with user data
-    new_balances = 0  # Create balance
+    new_balances = 0.0  # Create balance
     new_history = []  # Create history list
-    new_loans = 0  # Create loan
+    new_loans = 0.0  # Create loan
 
     return new_account, new_balances, new_history, new_loans
 
@@ -86,9 +86,17 @@ def identify_card_type():
 
 def username_check(user: str) -> bool:
     """Check if username exist"""
+
     for i in range(len(account_holders)):
         if account_holders[i][1] == user:
             return True
+    return False
+
+
+def empty_string(*args: str) -> bool:
+    """ Check if any of the provided strings are empty  """
+    if '' in args:
+        return True
     return False
 
 
@@ -98,24 +106,34 @@ def main():
         display_menu()
         choice = int(input("Enter your choice: "))
         # Map choices to functions
-        if choice == 1:  # 1️⃣ Create Account
+        if choice == 1: # 1️⃣ Create Account - used function create_account(), username_check(), empty_string()
 
-            print('\n' * 30)
+
+            print('\n' * 15)  # Clear console
             print("===================================")
             print(" 👤 Let's create your new account.")
             print("Please provide the following information:")
 
             while True:
-                username = input("Choose a username: ").lower()
-                username_exist = username_check(username)
-                if username_exist:
-                    print(f"Oops! That {username} is already taken. Please try a different one.")
+                username = input("Choose a username: ").strip().lower()
+
+                if username_check(username):
+                    print(
+                        f"Oops! That '{username}' is already taken. Please try a different one.")
+                    sleep(1)
                     continue
+
+                first_name = input("Enter your first name: ").strip().title()
+                last_name = input("Enter your last name: ").strip().title()
+
+                if empty_string(username, first_name, last_name):
+                    print("Oops! The input you provided is invalid. Please try again.")
+                    sleep(1)
+                    continue
+
                 break
 
-            account_id = len(account_holders)  # ID is current account_holders len
-            first_name = input("Enter your first name: ").title()
-            last_name = input("Enter your last name: ").title()
+            account_id = len(account_holders)  # ID is current account_holders length
 
             new_account, new_balances, new_history, new_loans = create_account(account_id, username, first_name,
                                                                                last_name)
@@ -127,12 +145,13 @@ def main():
             transaction_histories.append(new_history)
             loans.append(new_loans)
 
-            sleep(3)
+            sleep(2)
             print(f"Your account has been created successfully! 🎉 ")
             print(account_holders, balances, transaction_histories, loans)
-            print(f"Thank you {first_name} {last_name} for choosing Enhanced Bank System. "
+            print(f"Thank you for choosing Enhanced Bank System. "
                   f"Enjoy your banking experience!")
             sleep(2)
+
 
         elif choice == 2:
             deposit()
