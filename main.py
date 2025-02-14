@@ -1,12 +1,20 @@
 from time import sleep
 
 # Enhanced Bank Account Management System
-
+'''
 # 🏦 Data Structures to Store Information
 account_holders = []  # Account names
 balances = []  # Account balances
 transaction_histories = []  # Account transaction logs
 loans = []  # Account loan details
+'''
+account_holders = [[0, 'gosho', 'Georgi', 'Ivanov']]  # Account names
+balances = [0.0]  # Account balances
+transaction_histories = [[]]  # Account transaction logs
+loans = [0.0]  # Account loan details
+
+
+
 
 MAX_LOAN_AMOUNT = 10000
 INTEREST_RATE = 0.03
@@ -39,9 +47,22 @@ def create_account(user_id: int, user: str, f_name: str, l_name: str) -> (list, 
     return new_account, new_balances, new_history, new_loans
 
 
-def deposit():
+def deposit(user:str, value: float) -> (int, float, bool, list):
     """Deposit money into an account."""
-    pass  # TODO: Add logic
+    uid = find_id(user)
+    first_name,last_name = account_holders[uid][2], account_holders[uid][3]
+    is_valid = False
+    history = []
+
+    if value <= 0:
+        print("Error: Invalid amount. Please enter a positive number.")
+    else:
+        value = round(value, 2)
+        history = ["Deposit", value]
+        is_valid = True
+        print(f"{first_name} {last_name} you have received a deposit of ${value:.2f}.")
+
+    return uid, value, is_valid, history
 
 
 def withdraw():
@@ -99,6 +120,14 @@ def empty_string(*args: str) -> bool:
         return True
     return False
 
+def find_id(username: str) -> int:
+    """ Finds the id number of the username """
+    # account_holders[i][1]
+    for u_id in range(len(account_holders)):
+        if account_holders[u_id][1] == username:
+            return u_id
+
+
 
 def main():
     """Run the banking system."""
@@ -154,7 +183,29 @@ def main():
 
 
         elif choice == 2:
-            deposit()
+
+            attempts = 3 # attempts for wrong user
+            while attempts > 0:
+
+                account = input("Please enter your account number: ").lower().strip()
+
+                if username_check(account):
+
+                    deposit_value = float(input("Please enter the amount you'd like to deposit: "))
+                    uid, value, is_valid, history = deposit(account, deposit_value)
+
+                    if is_valid:
+                        balances[uid] += value
+                        transaction_histories[uid].extend(history)
+                        sleep(1)
+                        print(f"Current balance for user {account_holders[uid][1]} is ${balances[uid]:.2f}.")
+                    else:
+                        print("Deposit failed. Please ensure the amount is valid.")
+                    break
+                else:
+                    attempts -= 1
+                    print(f"You have {attempts} out of 3 attempts remaining. Please try again.")
+            sleep(2)
         elif choice == 3:
             withdraw()
         elif choice == 4:
