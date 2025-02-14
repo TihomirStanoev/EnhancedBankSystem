@@ -1,4 +1,5 @@
 from time import sleep
+from traceback import print_tb
 
 # Enhanced Bank Account Management System
 '''
@@ -8,13 +9,12 @@ balances = []  # Account balances
 transaction_histories = []  # Account transaction logs
 loans = []  # Account loan details
 '''
-account_holders = [[0, 'gosho', 'Georgi', 'Ivanov']]  # Account names
-balances = [0.0]  # Account balances
-transaction_histories = [[]]  # Account transaction logs
-loans = [0.0]  # Account loan details
-
-
-
+account_holders = [[0, 'gosho', 'Georgi', 'Todorov'], [1, 'jerry', 'Vasil', 'Iliev'], [2, 'kito', 'Kitodar', 'Todorov']]
+balances = [4700.0, 3680.0, 7000.0]
+transaction_histories = [[['Deposit', 5000.0], ['Withdraw', -300.0]],
+                         [['Deposit', 2000.0], ['Deposit', 1250.0], ['Deposit', 800.0], ['Withdraw', -300.0],
+                          ['Withdraw', -120.0], ['Deposit', 50.0]], [['Deposit', 12000.0], ['Withdraw', -5000.0]]]
+loans = [0.0, 0.0, 0.0]
 
 MAX_LOAN_AMOUNT = 10000
 INTEREST_RATE = 0.03
@@ -47,10 +47,10 @@ def create_account(user_id: int, user: str, f_name: str, l_name: str) -> (list, 
     return new_account, new_balances, new_history, new_loans
 
 
-def deposit(user:str, value: float) -> (int, float, bool, list):
+def deposit(user: str, value: float) -> (int, float, bool, list):
     """Deposit money into an account."""
     uid = find_id(user)
-    first_name,last_name = account_holders[uid][2], account_holders[uid][3]
+    first_name, last_name = account_holders[uid][2], account_holders[uid][3]
     is_valid = False
     history = []
 
@@ -65,9 +65,26 @@ def deposit(user:str, value: float) -> (int, float, bool, list):
     return uid, value, is_valid, history
 
 
-def withdraw():
+def withdraw(user: str, value: float) -> (int, float, bool, list):
     """Withdraw money from an account."""
-    pass  # TODO: Add logic
+    uid = find_id(user)
+    is_valid = False
+    history = []
+    user_balance = balances[uid]
+    value = round(value, 2)
+
+    if value <= 0:
+        print("Error: Please enter a valid withdrawal amount greater than zero.")
+
+    elif value > user_balance:
+        print(f"Error: Insufficient funds to complete the withdrawal. Your balance is ${user_balance:.2f}.")
+
+    elif value <= user_balance:
+        is_valid = True
+        print(f"Withdrawal successful! You have withdrawn ${value}.")
+        history = ["Withdraw", -value]
+
+    return uid, value, is_valid, history
 
 
 def check_balance():
@@ -85,9 +102,34 @@ def transfer_funds():
     pass  # TODO: Add logic
 
 
-def view_transaction_history():
+def view_transaction_history(user: str, last_transactions: int) -> None:
     """View transactions for an account."""
-    pass  # TODO: Add logic
+    uid = find_id(user)
+    history = range(len(transaction_histories[uid]))
+    total_amount, negative, positive = 0.0, 0.0, 0.0
+
+    if last_transactions in range(len(transaction_histories[uid]) + 1):
+        if last_transactions != 0:
+            history = range(len(transaction_histories[uid]) - last_transactions, len(transaction_histories[uid]))
+
+        print('No   Title      Amount [$]')
+        for i in history:
+            title, amount = transaction_histories[uid][i]
+            print(f"{i + 1}: {title:<10}  {amount:+06.2f}")
+
+            if amount > 0:
+                positive += amount
+            else:
+                negative += amount
+
+            total_amount += amount
+        print("-------------------------")
+        print(f'  Balance: ${total_amount:+06.2f}')
+
+    else:
+        print("Invalid input. The number entered is out of range. Please try again.")
+
+    sleep(3)
 
 
 def apply_for_loan():
@@ -120,23 +162,31 @@ def empty_string(*args: str) -> bool:
         return True
     return False
 
+
 def find_id(username: str) -> int:
     """ Finds the id number of the username """
-    # account_holders[i][1]
     for u_id in range(len(account_holders)):
         if account_holders[u_id][1] == username:
             return u_id
 
 
+def test():
+    print(f'account_holders = {account_holders}')
+    print(f'balances = {balances}')
+    print(f'transaction_histories = {transaction_histories}')
+    print(f'loans = {loans}')
+
 
 def main():
     """Run the banking system."""
+
     while True:
         display_menu()
+        #test()
+
         choice = int(input("Enter your choice: "))
         # Map choices to functions
-        if choice == 1: # 1️⃣ Create Account - used function create_account(), username_check(), empty_string()
-
+        if choice == 1:  # 1️⃣ Create Account - used function create_account(), username_check(), empty_string()
 
             print('\n' * 15)  # Clear console
             print("===================================")
@@ -164,7 +214,8 @@ def main():
 
             account_id = len(account_holders)  # ID is current account_holders length
 
-            new_account, new_balances, new_history, new_loans = create_account(account_id, username, first_name,
+            new_account, new_balances, new_history, new_loans = create_account(account_id, username,
+                                                                               first_name,
                                                                                last_name)
 
             print("\nCreating your account...")
@@ -176,38 +227,50 @@ def main():
 
             sleep(2)
             print(f"Your account has been created successfully! 🎉 ")
-            print(account_holders, balances, transaction_histories, loans)
             print(f"Thank you for choosing Enhanced Bank System. "
                   f"Enjoy your banking experience!")
             sleep(2)
 
+        elif choice == 2:  # "2️⃣ Deposit Money"
 
-        elif choice == 2:
+            account = input("Please enter your account name: ").lower().strip()
 
-            attempts = 3 # attempts for wrong user
-            while attempts > 0:
+            if username_check(account):
 
-                account = input("Please enter your account number: ").lower().strip()
+                deposit_value = float(input("Please enter the amount you'd like to deposit: "))
+                uid, value, is_valid, history = deposit(account, deposit_value)
 
-                if username_check(account):
-
-                    deposit_value = float(input("Please enter the amount you'd like to deposit: "))
-                    uid, value, is_valid, history = deposit(account, deposit_value)
-
-                    if is_valid:
-                        balances[uid] += value
-                        transaction_histories[uid].extend(history)
-                        sleep(1)
-                        print(f"Current balance for user {account_holders[uid][1]} is ${balances[uid]:.2f}.")
-                    else:
-                        print("Deposit failed. Please ensure the amount is valid.")
-                    break
+                if is_valid:
+                    balances[uid] += value
+                    transaction_histories[uid].append(history)
+                    sleep(1)
+                    print(f"Current balance for user '{account_holders[uid][1]}' is ${balances[uid]:.2f}.")
                 else:
-                    attempts -= 1
-                    print(f"You have {attempts} out of 3 attempts remaining. Please try again.")
-            sleep(2)
-        elif choice == 3:
-            withdraw()
+                    print("Deposit failed. Please ensure the amount is valid.")
+
+            else:
+                print("Error: The username you entered does not exist. Please check and try again.")
+            sleep(1)
+
+        elif choice == 3:  # 3️⃣ Withdraw Money
+
+            account = input("Please enter your account name: ").lower().strip()
+
+            if username_check(account):
+
+                withdraw_value = float(input("Enter the amount you'd like to withdraw: "))
+                uid, value, is_valid, history = withdraw(account, withdraw_value)
+
+                if is_valid:
+                    balances[uid] -= value
+                    transaction_histories[uid].append(history)
+                    sleep(1)
+                    print(f"Current balance for user '{account_holders[uid][1]}' is ${balances[uid]:.2f}.")
+                else:
+                    print("Withdrawal failed. Please ensure the amount is valid.")
+            else:
+                print("Error: The username you entered does not exist. Please check and try again.")
+
         elif choice == 4:
             check_balance()
         elif choice == 5:
@@ -215,7 +278,18 @@ def main():
         elif choice == 6:
             transfer_funds()
         elif choice == 7:
-            view_transaction_history()
+
+            account = input("Please enter your account name: ").lower().strip()
+
+            if username_check(account):
+                uid = find_id(account)
+                history_length = len(transaction_histories[uid])
+                transactions = int(input(
+                    f"Enter 0 to see all transactions or input a number (<= {history_length}) to view the last [X] transactions."))
+                view_transaction_history(account, transactions)
+
+
+
         elif choice == 8:
             apply_for_loan()
         elif choice == 9:
