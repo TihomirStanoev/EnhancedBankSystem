@@ -50,16 +50,16 @@ def create_account(user_id: int, user: str, f_name: str, l_name: str) -> (list, 
 def deposit(user: str, value: float) -> (int, float, bool, list):
     """Deposit money into an account."""
     uid = find_id(user)
-    first_name, last_name = account_holders[uid][2], account_holders[uid][3]
+    first_name, last_name = account_holders[uid][2], account_holders[uid][3] # Get the user's first and last names for a personalized message
     is_valid = False
     history = []
 
-    if value <= 0:
+    if value <= 0: # Check if the deposit value is valid (greater than zero)
         print("Error: Invalid amount. Please enter a positive number.")
     else:
         value = round(value, 2)
-        history = ["Deposit", value]
-        is_valid = True
+        history = ["Deposit", value]  # Record the transaction in the history
+        is_valid = True # Mark the transaction as valid
         print(f"{first_name} {last_name} you have received a deposit of ${value:.2f}.")
 
     return uid, value, is_valid, history
@@ -68,31 +68,31 @@ def deposit(user: str, value: float) -> (int, float, bool, list):
 def withdraw(user: str, value: float) -> (int, float, bool, list):
     """Withdraw money from an account."""
     uid = find_id(user)
-    is_valid = False
-    history = []
-    user_balance = balances[uid]
-    value = round(value, 2)
+    is_valid = False    # Initialize the validity flag
+    history = []    # Initialize history list
+    user_balance = balances[uid]    # Get the current balance of the user
+    value = round(value, 2)     # Round the withdrawal value to two decimal places for precision
 
-    if value <= 0:
+    if value <= 0:  # Check if the withdrawal value is greater than zero
         print("Error: Please enter a valid withdrawal amount greater than zero.")
 
-    elif value > user_balance:
+    elif value > user_balance:   # Check if the user has sufficient funds
         print(f"Error: Insufficient funds to complete the withdrawal. Your balance is ${user_balance:.2f}.")
 
-    elif value <= user_balance:
+    elif value <= user_balance:     # If the withdrawal value is valid, proceed with the transaction
         is_valid = True
-        print(f"Withdrawal successful! You have withdrawn ${value}.")
-        history = ["Withdraw", -value]
+        print(f"Withdrawal successful! You have withdrawn ${value:.2f}.")
+        history = ["Withdraw", -value]  # Record the transaction in the history with '-' sign
 
     return uid, value, is_valid, history
 
 
-def check_balance(user:str) -> float:
+def check_balance(user:str) -> str:
     """Check balance of an account."""
     uid = find_id(user)
     balance = balances[uid]
 
-    return balance
+    return f'${balance:.2f}'
 
 
 
@@ -290,7 +290,7 @@ def main():
 
             if username_check(account):
                 account_balance = check_balance(account)
-                print(f"Your current account balance is ${account_balance:.2f}.")
+                print(f"Your current account balance is {account_balance}.")
                 print("Thank you for banking with us!")
 
             else:
