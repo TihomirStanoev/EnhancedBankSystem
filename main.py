@@ -14,7 +14,7 @@ balances = [4700.0, 3680.0, 7000.0]
 transaction_histories = [[['Deposit', 5000.0], ['Withdraw', -300.0]],
                          [['Deposit', 2000.0], ['Deposit', 1250.0], ['Deposit', 800.0], ['Withdraw', -300.0],
                           ['Withdraw', -120.0], ['Deposit', 50.0]], [['Deposit', 12000.0], ['Withdraw', -5000.0]]]
-loans = [0.0, 0.0, 0.0]
+loans = [10000.0, 0.0, 0.0]
 
 MAX_LOAN_AMOUNT = 10000
 INTEREST_RATE = 0.03
@@ -36,7 +36,7 @@ def display_menu():
     print("0️⃣ Exit")
 
 
-def create_account(user_id: int, user: str, f_name: str, l_name: str) -> (list , float , list , float):
+def create_account(user_id: int, user: str, f_name: str, l_name: str) -> (list, float, list, float):
     """Create a new account."""
 
     new_account = [user_id, user, f_name, l_name]  # Create new list with user data
@@ -87,22 +87,25 @@ def withdraw(user: str, value: float) -> (int, float, bool, list):
     return uid, value, is_valid, history
 
 
-def check_balance():
+def check_balance(user:str) -> float:
     """Check balance of an account."""
-    pass  # TODO: Add logic
+    uid = find_id(user)
+    balance = balances[uid]
+
+    return balance
+
 
 
 def list_accounts():
     """List all account holders and details."""
 
     print(f"ID  Username    Firstname  Lastname    Balance $      Loans $")
-    for uid in range(len(account_holders)):
-        print(f"{uid:<4}", end='')
+    for uid in range(len(account_holders)): # Loop through all account holders
+        print(f"{uid:<4}", end='') # Print account ID, ensuring a minimum width of 4 characters for alignment
         print(f"{account_holders[uid][1]:<10}  {account_holders[uid][2]:<10} {account_holders[uid][3]:<10}",
               end=' ' * 4)
-        print(f"{balances[uid]:.2f}", end=' ' * 6)
-        print(f"   {loans[uid]:.2f}")
-
+        print(f"{balances[uid]:.2f}", end=' ' * 6) # Print the account balance with 2 decimal places, with some padding
+        print(f"{loans[uid]:.2f}") if loans[uid] > 0 else print("")   # Print the loan balance with 2 decimal places
 
 
 def transfer_funds():
@@ -112,29 +115,30 @@ def transfer_funds():
 
 def view_transaction_history(user: str, last_transactions: int) -> None:
     """View transactions for an account."""
-    uid = find_id(user) # Retrieve the unique user ID using the username
-    history = range(len(transaction_histories[uid])) # Generate a range for all transactions for the given user
-    total_amount, negative, positive = 0.0, 0.0, 0.0 # Initialize variables for calculating total and categorized amounts
+    uid = find_id(user)  # Retrieve the unique user ID using the username
+    history = range(len(transaction_histories[uid]))  # Generate a range for all transactions for the given user
+    total_amount, negative, positive = 0.0, 0.0, 0.0  # Initialize variables for calculating total and categorized amounts
 
-    if last_transactions in range(len(transaction_histories[uid]) + 1): # Check if the input number of transactions is within the valid range
-        if last_transactions != 0: # If the user wants to see a specific number of recent transactions (not all)
+    if last_transactions in range(
+            len(transaction_histories[uid]) + 1):  # Check if the input number of transactions is within the valid range
+        if last_transactions != 0:  # If the user wants to see a specific number of recent transactions (not all)
             history = range(len(transaction_histories[uid]) - last_transactions, len(transaction_histories[uid]))
 
         print('No   Title      Amount [$]')
-        for i in history: # Loop through each transaction and print details
+        for i in history:  # Loop through each transaction and print details
             title, amount = transaction_histories[uid][i]
             print(f"{i + 1}: {title:<10}  {amount:+06.2f}")
 
-            if amount > 0: # Categorize the transaction amount as positive or negative
+            if amount > 0:  # Categorize the transaction amount as positive or negative
                 positive += amount
             else:
                 negative += amount
 
-            total_amount += amount # Keep a running total of all amounts
+            total_amount += amount  # Keep a running total of all amounts
         print("-------------------------")
         print(f'  Balance: ${total_amount:+06.2f}')
 
-    else: # Handle case when the input number is out of range
+    else:  # Handle case when the input number is out of range
         print("Invalid input. The number entered is out of range. Please try again.")
 
     sleep(3)
@@ -173,10 +177,12 @@ def empty_string(*args: str) -> bool:
 
 def find_id(username: str) -> int | None:
     """ Finds the id number of the username """
-    for u_id in range(len(account_holders)): # Iterate over all account holders by their index in the account_holders list
+    for u_id in range(
+            len(account_holders)):  # Iterate over all account holders by their index in the account_holders list
         if account_holders[u_id][1] == username:
-            return u_id # Return the index (user ID) of the account holder if a match is found
+            return u_id  # Return the index (user ID) of the account holder if a match is found
     return None
+
 
 def test():
     print(f'account_holders = {account_holders}')
@@ -190,11 +196,11 @@ def main():
 
     while True:
         display_menu()
-        #test()
+        # test()
 
         choice = int(input("Enter your choice: "))
         # Map choices to functions
-        if choice == 1:  # 1️⃣ Create Account - used function create_account(), username_check(), empty_string()
+        if choice == 1:  # 1️⃣ Create Account
 
             print("===================================")
             print(" 👤 Let's create your new account.")
@@ -278,10 +284,23 @@ def main():
             else:
                 print("Error: The username you entered does not exist. Please check and try again.")
 
-        elif choice == 4:
-            check_balance()
-        elif choice == 5:
+        elif choice == 4: # "4️⃣ Check Balance"
+
+            account = input("Please enter your account name: ").lower().strip()
+
+            if username_check(account):
+                account_balance = check_balance(account)
+                print(f"Your current account balance is ${account_balance:.2f}.")
+                print("Thank you for banking with us!")
+
+            else:
+                print("Error: The username you entered does not exist. Please check and try again.")
+
+            sleep(1)
+
+        elif choice == 5: #5️⃣ List All Accounts
             list_accounts()
+
         elif choice == 6:
             transfer_funds()
         elif choice == 7:
