@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2cb516bc-efec-4fea-bfe4-2522f9b0a258" name="Changes" comment="Deposit">
+    <list default="true" id="2cb516bc-efec-4fea-bfe4-2522f9b0a258" name="Changes" comment="view_transaction_history">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
@@ -103,13 +103,22 @@
       <option name="project" value="LOCAL" />
       <updated>1739560166197</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="view_transaction_history">
+      <option name="closed" value="true" />
+      <created>1739570016270</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1739570016270</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Python Code Skeleton" />
     <MESSAGE value="Create Account" />
     <MESSAGE value="Deposit" />
-    <option name="LAST_COMMIT_MESSAGE" value="Deposit" />
+    <MESSAGE value="view_transaction_history" />
+    <option name="LAST_COMMIT_MESSAGE" value="view_transaction_history" />
   </component>
 </project>

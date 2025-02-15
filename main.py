@@ -36,7 +36,7 @@ def display_menu():
     print("0️⃣ Exit")
 
 
-def create_account(user_id: int, user: str, f_name: str, l_name: str) -> (list, float, list, float):
+def create_account(user_id: int, user: str, f_name: str, l_name: str) -> (list , float , list , float):
     """Create a new account."""
 
     new_account = [user_id, user, f_name, l_name]  # Create new list with user data
@@ -94,7 +94,15 @@ def check_balance():
 
 def list_accounts():
     """List all account holders and details."""
-    pass  # TODO: Add logic
+
+    print(f"ID  Username    Firstname  Lastname    Balance $      Loans $")
+    for uid in range(len(account_holders)):
+        print(f"{uid:<4}", end='')
+        print(f"{account_holders[uid][1]:<10}  {account_holders[uid][2]:<10} {account_holders[uid][3]:<10}",
+              end=' ' * 4)
+        print(f"{balances[uid]:.2f}", end=' ' * 6)
+        print(f"   {loans[uid]:.2f}")
+
 
 
 def transfer_funds():
@@ -104,29 +112,29 @@ def transfer_funds():
 
 def view_transaction_history(user: str, last_transactions: int) -> None:
     """View transactions for an account."""
-    uid = find_id(user)
-    history = range(len(transaction_histories[uid]))
-    total_amount, negative, positive = 0.0, 0.0, 0.0
+    uid = find_id(user) # Retrieve the unique user ID using the username
+    history = range(len(transaction_histories[uid])) # Generate a range for all transactions for the given user
+    total_amount, negative, positive = 0.0, 0.0, 0.0 # Initialize variables for calculating total and categorized amounts
 
-    if last_transactions in range(len(transaction_histories[uid]) + 1):
-        if last_transactions != 0:
+    if last_transactions in range(len(transaction_histories[uid]) + 1): # Check if the input number of transactions is within the valid range
+        if last_transactions != 0: # If the user wants to see a specific number of recent transactions (not all)
             history = range(len(transaction_histories[uid]) - last_transactions, len(transaction_histories[uid]))
 
         print('No   Title      Amount [$]')
-        for i in history:
+        for i in history: # Loop through each transaction and print details
             title, amount = transaction_histories[uid][i]
             print(f"{i + 1}: {title:<10}  {amount:+06.2f}")
 
-            if amount > 0:
+            if amount > 0: # Categorize the transaction amount as positive or negative
                 positive += amount
             else:
                 negative += amount
 
-            total_amount += amount
+            total_amount += amount # Keep a running total of all amounts
         print("-------------------------")
         print(f'  Balance: ${total_amount:+06.2f}')
 
-    else:
+    else: # Handle case when the input number is out of range
         print("Invalid input. The number entered is out of range. Please try again.")
 
     sleep(3)
@@ -163,12 +171,12 @@ def empty_string(*args: str) -> bool:
     return False
 
 
-def find_id(username: str) -> int:
+def find_id(username: str) -> int | None:
     """ Finds the id number of the username """
-    for u_id in range(len(account_holders)):
+    for u_id in range(len(account_holders)): # Iterate over all account holders by their index in the account_holders list
         if account_holders[u_id][1] == username:
-            return u_id
-
+            return u_id # Return the index (user ID) of the account holder if a match is found
+    return None
 
 def test():
     print(f'account_holders = {account_holders}')
@@ -188,7 +196,6 @@ def main():
         # Map choices to functions
         if choice == 1:  # 1️⃣ Create Account - used function create_account(), username_check(), empty_string()
 
-            print('\n' * 15)  # Clear console
             print("===================================")
             print(" 👤 Let's create your new account.")
             print("Please provide the following information:")
