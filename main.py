@@ -1,5 +1,4 @@
 from time import sleep
-from traceback import print_tb
 
 # Enhanced Bank Account Management System
 '''
@@ -9,19 +8,14 @@ balances = []  # Account balances
 transaction_histories = []  # Account transaction logs
 loans = []  # Account loan details
 '''
-account_holders = [[0, 'jerry', 'Hristian', 'Tonov'], [1, 'mddn', 'Georgi', 'Vasilev'], [2, 'bati_pesho', 'Petar', 'Petrov']]
-balances = [0.0, 9200.0, 0.0]
-transaction_histories = [[], [['Deposit', 10000.0], ['Deposit', 1200.0], ['Withdraw', -2000.0]], []]
-loans = [0.0, 0.0, 0.0]
 
-'''
 account_holders = [[0, 'gosho', 'Georgi', 'Todorov'], [1, 'jerry', 'Vasil', 'Iliev'], [2, 'kito', 'Kitodar', 'Todorov']]
 balances = [4700.0, 3680.0, 7000.0]
 transaction_histories = [[['Deposit', 5000.0], ['Withdraw', -300.0]],
                          [['Deposit', 2000.0], ['Deposit', 1250.0], ['Deposit', 800.0], ['Withdraw', -300.0],
                           ['Withdraw', -120.0], ['Deposit', 50.0]], [['Deposit', 12000.0], ['Withdraw', -5000.0]]]
 loans = [10000.0, 0.0, 0.0]
-'''
+
 MAX_LOAN_AMOUNT = 10000
 INTEREST_RATE = 0.03
 
@@ -58,29 +52,28 @@ def create_account(user: str, f_name: str, l_name: str) -> str:
     loans.append(new_loans)
     sleep(2)
 
-    return "Your account has been created successfully! 🎉 "
+    return "Your account has been created successfully! 🎉"
 
 
 def deposit(user: str, value: float) -> str:
     """Deposit money into an account."""
     uid = find_id(user)
-    first_name, last_name = account_holders[uid][2], account_holders[uid][
-        3]  # Get the user's first and last names for a personalized message
-    history = []
-    result = ''
+    history = ["Deposit", value]  # Initialize history list
+    first_name, last_name = account_holders[uid][2], account_holders[uid][3]  # Get the user's first and last names for a personalized message
+    value = round(value, 2)
+    message = ''
 
-    if value <= 0:  # Check if the deposit value is valid (greater than zero)
-        result = "Error: Invalid amount. Please enter a positive number."
-    else:
-        value = round(value, 2)
-        history = ["Deposit", value]  # Record the transaction in the history
-        result = f"{first_name} {last_name} you have received a deposit of ${value:.2f}."
 
+    if value > 0:  # Check if the deposit value is valid (greater than zero)
         balances[uid] += value
         transaction_histories[uid].append(history)
 
+        message = f"{first_name} {last_name} you have received a deposit of ${value:.2f}."
 
-    return result
+    else:
+        message = "Error: Invalid amount. Please enter a positive number."
+
+    return message
 
 
 def withdraw(user: str, value: float) -> str:
@@ -89,26 +82,23 @@ def withdraw(user: str, value: float) -> str:
     history = ["Withdraw", -value]  # Initialize history list
     user_balance = balances[uid]  # Get the current balance of the user
     value = round(value, 2)  # Round the withdrawal value to two decimal places for precision
-    result = ''
-
-
+    message = ''
 
     if value <= 0:  # Check if the withdrawal value is greater than zero
-        result = "Error: Please enter a valid withdrawal amount greater than zero."
+        message = "Error: Please enter a valid withdrawal amount greater than zero."
 
     elif value > user_balance:  # Check if the user has sufficient funds
-        result = f"Error: Insufficient funds to complete the withdrawal. Your balance is ${user_balance:.2f}."
+        message = f"Error: Insufficient funds to complete the withdrawal. Your balance is ${user_balance:.2f}."
 
     elif value <= user_balance:  # If the withdrawal value is valid, proceed with the transaction
         balances[uid] -= value
         transaction_histories[uid].append(history)
 
-        result = f"Withdrawal successful! You have withdrawn ${value:.2f}."
+        message = f"Withdrawal successful! You have withdrawn ${value:.2f}."
     else:
-        result = "Withdrawal failed. Please ensure the amount is valid."
+        message = "Withdrawal failed. Please ensure the amount is valid."
 
-
-    return result
+    return message
 
 
 def check_balance(user: str) -> str:
@@ -119,7 +109,7 @@ def check_balance(user: str) -> str:
     return f'${balance:.2f}'
 
 
-def list_accounts():
+def list_accounts() -> None:
     """List all account holders and details."""
 
     print(f"ID  Username    Firstname  Lastname    Balance $      Loans $")
@@ -131,9 +121,32 @@ def list_accounts():
         print(f"{loans[uid]:.2f}") if loans[uid] > 0 else print("")  # Print the loan balance with 2 decimal places
 
 
-def transfer_funds():
+def transfer_funds(sender:str, receiver:str, amount:float) -> str:
     """Transfer funds between two accounts."""
-    pass  # TODO: Add logic
+    uid_sender, uid_receiver = find_id(sender), find_id(receiver)
+    sender_balance, receiver_balance = balances[uid_sender], balances[uid_receiver]
+    value = round(amount, 2)
+    history_type = "Transfer"
+    history = [[history_type, value],[history_type, -value]]
+    message = ''
+
+    if value <= 0:
+        message = "Error: Please enter a valid amount greater than zero."
+
+    elif value > sender_balance:
+        message = f"Error: Insufficient funds to complete the transfer. Sender balance is ${sender_balance:.2f}."
+
+    elif value <= sender_balance:
+        balances[uid_sender] -= value
+        balances[uid_receiver] += value
+        transaction_histories[uid_sender].append(history[0])
+        transaction_histories[uid_receiver].append(history[1])
+
+        message = f"The transfer of ${value:.2f} has been completed to {account_holders[uid_receiver][1]}"
+
+
+    return message
+
 
 
 def view_transaction_history(user: str, last_transactions: int) -> None:
@@ -298,7 +311,29 @@ def main():
             list_accounts()
 
         elif choice == 6:
-            transfer_funds()
+            # Sender Receiver
+            sender_account = input("Please enter sender account name: ").lower().strip()
+            receiver_account = input("Please enter receiver account name: ").lower().strip()
+
+            sender_is_valid = username_check(sender_account)
+            receiver_is_valid = username_check(receiver_account)
+
+
+            if sender_is_valid and receiver_is_valid:
+                amount = float(input("Enter the amount you wish to transfer."))
+                print(transfer_funds(sender_account, receiver_account, amount))
+
+
+            elif not receiver_is_valid:
+                print("Receiver account not found. Please ensure the account number is correct.")
+
+
+            elif not sender_is_valid:
+                print("Sender account not found. Please ensure the account number is correct.")
+
+            sleep(2)
+
+
         elif choice == 7:
 
             account = input("Please enter your account name: ").lower().strip()
