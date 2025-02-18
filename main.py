@@ -257,8 +257,24 @@ def find_id(username: str) -> int | None:
     return None
 
 def loan_status(user) ->str:
-    pass
+    uid = find_id(user)
+    message = ''
 
+    if loans[uid][0] != 0:
+        message = f'''
+        Loan status for user '{account_holders[uid][0]}':
+        Remaining loan: {loans[uid][0]};
+        Monthly payment: ${loans[uid][1]:.2f};
+        Remaining months: {loans[uid][2]};
+        Interest Rate: {loans[uid][3]};
+        
+        '''
+
+
+    else:
+        message = ""
+
+    return message
 
 def test():
     print(f'account_holders = {account_holders}')
