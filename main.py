@@ -14,11 +14,13 @@ balances = [4700.0, 3680.0, 7000.0]
 transaction_histories = [[['Deposit', 5000.0], ['Withdraw', -300.0]],
                          [['Deposit', 2000.0], ['Deposit', 1250.0], ['Deposit', 800.0], ['Withdraw', -300.0],
                           ['Withdraw', -120.0], ['Deposit', 50.0]], [['Deposit', 12000.0], ['Withdraw', -5000.0]]]
-loans = [10000.0, 0.0, 0.0]
+loans = [[0,0,0,0], [0,0,0,0], [0,0,0,0]]
 
+MIN_LOAN_AMOUNT = 1000
 MAX_LOAN_AMOUNT = 10000
 INTEREST_RATE = 0.03
-
+MIN_PERIOD_YEARS = 1
+MAX_PERIOD_YEARS = 10
 
 def display_menu():
     """Main menu for banking system."""
@@ -42,7 +44,7 @@ def create_account(user: str, f_name: str, l_name: str) -> str:
     new_account = [user_id, user, f_name, l_name]  # Create new list with user data
     new_balances = 0.0  # Create balance
     new_history = []  # Create history list
-    new_loans = 0.0  # Create loan
+    new_loans = [0,0,0,0]  # Create loan
 
     print("\nCreating your account...")
 
@@ -112,13 +114,13 @@ def check_balance(user: str) -> str:
 def list_accounts() -> None:
     """List all account holders and details."""
 
-    print(f"ID  Username    Firstname  Lastname    Balance $      Loans $")
+    print(f"ID  Username    Firstname  Lastname    Balance $      Remaining Loans $")
     for uid in range(len(account_holders)):  # Loop through all account holders
         print(f"{uid:<4}", end='')  # Print account ID, ensuring a minimum width of 4 characters for alignment
         print(f"{account_holders[uid][1]:<10}  {account_holders[uid][2]:<10} {account_holders[uid][3]:<10}",
               end=' ' * 4)
         print(f"{balances[uid]:.2f}", end=' ' * 6)  # Print the account balance with 2 decimal places, with some padding
-        print(f"{loans[uid]:.2f}") if loans[uid] > 0 else print("")  # Print the loan balance with 2 decimal places
+        print(f"{loans[uid][0]:.2f}") if loans[uid][0] > 0 else print("")  # Print the loan balance with 2 decimal places
 
 
 def transfer_funds(sender:str, receiver:str, amount:float) -> str:
@@ -179,10 +181,45 @@ def view_transaction_history(user: str, last_transactions: int) -> None:
 
     sleep(3)
 
+def loan_calculator(loan:float, period_years:int) -> list:
 
-def apply_for_loan():
+    months = period_years * 12
+    rate = INTEREST_RATE / 12
+    monthly_pay = loan * (rate / (1 - (1 + rate) ** -months))
+    monthly_pay = round(monthly_pay, 2)
+    total_loan = round(monthly_pay * period_years * 12, 2)
+
+    return [total_loan, monthly_pay, months, INTEREST_RATE]
+
+
+
+def apply_for_loan(user: str, declared_loan: float, period:int) -> str:
     """Allow user to apply for a loan."""
-    pass  # TODO: Add logic
+    uid = find_id(user)
+    declared_loan = round(declared_loan,0)
+    history = ["Loan Movement", declared_loan]
+
+
+    if loans[uid][0] != 0:
+        return f"Error: User '{account_holders[uid][1]}' has a loan remaining of ${loans[uid][0]:.2f}."
+
+    if period > MAX_PERIOD_YEARS or period < MIN_PERIOD_YEARS:
+        return f"Error: The period needs to be greater than {MIN_PERIOD_YEARS} and smaller than {MAX_PERIOD_YEARS} years."
+
+    if declared_loan > MAX_LOAN_AMOUNT or declared_loan < MIN_LOAN_AMOUNT:
+        return f"Error: Please enter a loan amount between ${MIN_LOAN_AMOUNT} and ${MAX_LOAN_AMOUNT}."
+
+    created_loan = loan_calculator(declared_loan, period)
+    loans[uid] = created_loan
+    balances[uid] += declared_loan
+    transaction_histories[uid].append(history)
+
+
+    return (f"New loan for user '{user}' details: \n"
+            f"Total Loan: \n{created_loan[0]:.2f};\n"
+            f"Monthly Payment: ${created_loan[1]:.2f};\n"
+            f"Months: {created_loan[2]};\n"
+            f"Interest Rate: {created_loan[3]}%.")
 
 
 def repay_loan():
@@ -218,6 +255,9 @@ def find_id(username: str) -> int | None:
         if account_holders[u_id][1] == username:
             return u_id  # Return the index (user ID) of the account holder if a match is found
     return None
+
+def loan_status(user) ->str:
+    pass
 
 
 def test():
@@ -323,7 +363,6 @@ def main():
                 amount = float(input("Enter the amount you wish to transfer."))
                 print(transfer_funds(sender_account, receiver_account, amount))
 
-
             elif not receiver_is_valid:
                 print("Receiver account not found. Please ensure the account number is correct.")
 
@@ -348,7 +387,14 @@ def main():
 
 
         elif choice == 8:
-            apply_for_loan()
+            account = input("Please enter your account name: ").lower().strip()
+            period_years = int(input(f"Please enter a period between {MIN_PERIOD_YEARS} and {MAX_PERIOD_YEARS} years: "))
+            loan_amount = float(input(f"Enter a loan amount between ${MIN_LOAN_AMOUNT} and ${MAX_LOAN_AMOUNT}:"))
+
+            if username_check(account):
+                print(apply_for_loan(account, loan_amount, period_years))
+
+
         elif choice == 9:
             repay_loan()
         elif choice == 10:
