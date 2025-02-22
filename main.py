@@ -222,20 +222,18 @@ def apply_for_loan(user: str, declared_loan: float, period: int) -> str:
     return message
 
 
-def repay_loan(user: str, months: int):
+def repay_loan(user: str, months: int) -> str:
     """Allow user to repay a loan."""
     uid = find_id(user)
     monthly_payment = loans[uid][1]
     remaining_months = loans[uid][2]
     remaining_loan = loans[uid][0]
     user_balance = balances[uid]
-    repay_amount = round(months * monthly_payment,2)
+    repay_amount = round(months * monthly_payment, 2)
     history = ["Repay Loan:", -repay_amount]
 
-
     if user_balance < repay_amount:
-        return
-
+        return f"Error: Insufficient funds to complete the repay. Your balance is ${user_balance:.2f}."
 
     for month in range(months):
         if remaining_loan < 0:
@@ -245,18 +243,20 @@ def repay_loan(user: str, months: int):
         remaining_loan = round(remaining_loan, 2)
         remaining_months -= 1
 
-
     if remaining_loan <= 0:
         loans[uid][0] = 0
         loans[uid][1] = 0
         loans[uid][2] = 0
         loans[uid][3] = 0
+
     else:
         loans[uid][0] = remaining_loan
         loans[uid][2] = remaining_months
 
-  #  balances[uid] -= repay_amount
+    balances[uid] -= repay_amount
     transaction_histories[uid].append(history)
+
+    return loan_status(user)[0]
 
 
 def identify_card_type():
@@ -295,19 +295,17 @@ def loan_status(user: str) -> tuple[str, bool]:
     exist_loan = False
 
     if loans[uid][0] != 0:
-        message = f'''
-        Loan status for user '{account_holders[uid][1]}':
-        Remaining loan: ${loans[uid][0]}
-        Monthly payment: ${loans[uid][1]:.2f}
-        Remaining months: {loans[uid][2]}
-        Interest Rate: {loans[uid][3] * 100:.0f}% '''
+        message = f"Loan status for user '{account_holders[uid][1]}':\n"
+        message += f'Remaining loan: ${loans[uid][0]}\n'
+        message += f'Monthly payment: ${loans[uid][1]:.2f}\n'
+        message += f'Remaining months: {loans[uid][2]}\n'
+        message += f'Interest Rate: {loans[uid][3] * 100:.0f}%'
         exist_loan = True
 
     else:
         message = 'Error: No loans available yet..'
 
     return message, exist_loan
-
 
 
 def test():
@@ -400,7 +398,7 @@ def main():
         elif choice == 5:  # 5️⃣ List All Accounts
             list_accounts()
 
-        elif choice == 6: # 6️⃣ Transfer Funds
+        elif choice == 6:  # 6️⃣ Transfer Funds
             # Sender Receiver
             sender_account = input("Please enter sender account name: ").lower().strip()
             receiver_account = input("Please enter receiver account name: ").lower().strip()
@@ -422,7 +420,7 @@ def main():
             sleep(2)
 
 
-        elif choice == 7: # 7️⃣ View Transaction History
+        elif choice == 7:  # 7️⃣ View Transaction History
 
             account = input("Please enter your account name: ").lower().strip()
 
@@ -435,7 +433,7 @@ def main():
 
 
 
-        elif choice == 8: # 8️⃣ Apply for Loan
+        elif choice == 8:  # 8️⃣ Apply for Loan
             account = input("Please enter your account name: ").lower().strip()
             period_years = int(
                 input(f"Please enter a period between {MIN_PERIOD_YEARS} and {MAX_PERIOD_YEARS} years: "))
@@ -450,16 +448,14 @@ def main():
         elif choice == 9:
 
             account = input("Please enter your account name: ").lower().strip()
-            msg, exist_loan = loan_status(account)
-            print(msg)
 
-            if exist_loan:
-                total_months = int(input("Please specify the number of months over which you'd like to repay the loan:"))
+            if username_check(account):
+                msg, exist_loan = loan_status(account)
 
-
-
-
-                repay_loan(account, total_months)
+                if exist_loan:
+                    total_months = int(
+                        input("Please specify the number of months over which you'd like to repay the loan: "))
+                    print(repay_loan(account, total_months))
 
             sleep(1)
 
