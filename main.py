@@ -224,16 +224,21 @@ def apply_for_loan(user: str, declared_loan: float, period: int) -> str:
 
 def repay_loan(user: str, months: int) -> str:
     """Allow user to repay a loan."""
+
     uid = find_id(user)
     monthly_payment = loans[uid][1]
     remaining_months = loans[uid][2]
     remaining_loan = loans[uid][0]
     user_balance = balances[uid]
     repay_amount = round(months * monthly_payment, 2)
-    history = ["Repay Loan:", -repay_amount]
+    history = ["Repay Loan", -repay_amount]
 
     if user_balance < repay_amount:
         return f"Error: Insufficient funds to complete the repay. Your balance is ${user_balance:.2f}."
+    elif months > remaining_months:
+        return f"Error: You cannot extend the repayment beyond the remaining months."
+    elif months == 0:
+        return "Loan repay canceled!"
 
     for month in range(months):
         if remaining_loan < 0:
@@ -450,9 +455,13 @@ def main():
             account = input("Please enter your account name: ").lower().strip()
 
             if username_check(account):
-                msg, exist_loan = loan_status(account)
+                loan_status_message, exist_loan = loan_status(account)
 
                 if exist_loan:
+
+                    print(f'Current account balance is {check_balance(account)}')
+                    print(loan_status_message)
+
                     total_months = int(
                         input("Please specify the number of months over which you'd like to repay the loan: "))
                     print(repay_loan(account, total_months))
