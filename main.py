@@ -1,20 +1,12 @@
 from time import sleep
 
 # Enhanced Bank Account Management System
-'''
+
 # 🏦 Data Structures to Store Information
 account_holders = []  # Account names
 balances = []  # Account balances
 transaction_histories = []  # Account transaction logs
 loans = []  # Account loan details
-'''
-
-account_holders = [[0, 'gosho', 'Georgi', 'Todorov'], [1, 'jerry', 'Vasil', 'Iliev'], [2, 'kito', 'Kitodar', 'Todorov']]
-balances = [4700.0, 3680.0, 7000.0]
-transaction_histories = [[['Deposit', 5000.0], ['Withdraw', -300.0]],
-                         [['Deposit', 2000.0], ['Deposit', 1250.0], ['Deposit', 800.0], ['Withdraw', -300.0],
-                          ['Withdraw', -120.0], ['Deposit', 50.0]], [['Deposit', 12000.0], ['Withdraw', -5000.0]]]
-loans = [[0, 0, 0, 0], [5081.64, 423.47, 12, 0.03], [0, 0, 0, 0]]
 
 MIN_LOAN_AMOUNT = 1000
 MAX_LOAN_AMOUNT = 10000
@@ -264,9 +256,47 @@ def repay_loan(user: str, months: int) -> str:
     return loan_status(user)[0]
 
 
-def identify_card_type():
-    """Identify type of credit card."""
-    pass  # TODO: Add logic
+def identify_card_type(card_number: str) -> str:
+    """Identify type of credit card.
+    Visa: Card number starts with 4 (e.g., 4123...).
+    MasterCard: Card number starts with numbers between 51 and 55 (e.g., 5123...).
+    American Express: Card number starts with 34 or 37 (e.g., 3712...).
+    Other: If the card number doesn’t match the above patterns"""
+
+    def luhn(card):
+        # Luhn algorithm https://stackoverflow.com/questions/32541487/is-this-the-most-efficient-way-to-write-the-luhn-algorithm-in-python
+        sum = 0
+        num_digits = len(card)
+        oddeven = num_digits & 1
+        for count in range(0, num_digits):
+            digit = int(card[count])
+            if not ((count & 1) ^ oddeven):
+                digit = digit * 2
+            if digit > 9:
+                digit = digit - 9
+            sum = sum + digit
+
+        if sum % 10 == 0 and num_digits == 16:
+            return True
+        else:
+            return False
+
+    type_of_card = 'Type of card: '
+
+    if luhn(card_number):
+        if card_number[0] == '4':
+            type_of_card += 'Visa'
+        elif int(card_number[:2]) in range(51, 55 + 1):
+            type_of_card += 'MasterCard'
+        elif int(card_number[:2]) in range(34, 37 + 1):
+            type_of_card += 'American Express'
+        else:
+            type_of_card += 'other'
+
+    else:
+        type_of_card = 'Error: Invalid card number.'
+
+    return type_of_card
 
 
 def username_check(user: str) -> bool:
@@ -313,19 +343,12 @@ def loan_status(user: str) -> tuple[str, bool]:
     return message, exist_loan
 
 
-def test():
-    print(f'account_holders = {account_holders}')
-    print(f'balances = {balances}')
-    print(f'transaction_histories = {transaction_histories}')
-    print(f'loans = {loans}')
-
 
 def main():
     """Run the banking system."""
 
     while True:
         display_menu()
-        test()
 
         choice = int(input("Enter your choice: "))
         # Map choices to functions
@@ -450,7 +473,7 @@ def main():
                 print("Error: The username you entered does not exist. Please check and try again.")
             sleep(2)
 
-        elif choice == 9:
+        elif choice == 9: # 9️⃣ Repay Loan
 
             account = input("Please enter your account name: ").lower().strip()
 
@@ -458,7 +481,6 @@ def main():
                 loan_status_message, exist_loan = loan_status(account)
 
                 if exist_loan:
-
                     print(f'Current account balance is {check_balance(account)}')
                     print(loan_status_message)
 
@@ -468,8 +490,12 @@ def main():
 
             sleep(1)
 
-        elif choice == 10:
-            identify_card_type()
+        elif choice == 10:  # 🔟 Identify Credit Card Type
+            card_number = input("Please enter card number: ").replace(' ', '')
+            print(identify_card_type(card_number))
+
+            sleep(1)
+
         elif choice == 0:
             print("Goodbye! 👋")
             break
