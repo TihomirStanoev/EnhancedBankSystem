@@ -276,7 +276,7 @@ def identify_card_type(card_number: str) -> str:
                 digit = digit - 9
             sum = sum + digit
 
-        if sum % 10 == 0 and num_digits == 16:
+        if sum % 10 == 0:
             return True
         else:
             return False
