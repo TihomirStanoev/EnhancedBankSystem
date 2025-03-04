@@ -40,7 +40,7 @@
 <pre>python main.py</pre>
 <p><strong>&nbsp;</strong></p>
 <h1><strong>📸 Demo</strong></h1>
-<strong><b>🚀🚀Try it out:</b></strong> <b><a href="https://www.programiz.com/online-compiler/0ABU5PehLsg4Y" target="_blank">DEMO</a></b>
+<strong><b>🚀🚀Try it out:</b></strong> <b><a href="https://www.programiz.com/online-compiler/74XLinRNBw9KR" target="_blank">DEMO</a></b>
 <p><strong>&nbsp;</strong></p>
 <p><strong>&nbsp;</strong></p>
 <p><strong>&nbsp;</strong></p>
