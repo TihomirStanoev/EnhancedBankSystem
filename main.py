@@ -265,18 +265,19 @@ def identify_card_type(card_number: str) -> str:
 
     def luhn(card):
         # Luhn algorithm https://stackoverflow.com/questions/32541487/is-this-the-most-efficient-way-to-write-the-luhn-algorithm-in-python
-        sum = 0
-        num_digits = len(card)
-        oddeven = num_digits & 1
-        for count in range(0, num_digits):
-            digit = int(card[count])
-            if not ((count & 1) ^ oddeven):
-                digit = digit * 2
-            if digit > 9:
-                digit = digit - 9
-            sum = sum + digit
+        digit_sum = 0
 
-        if sum % 10 == 0:
+        for i, digit in enumerate(reversed(card)):
+            n = int(digit)
+
+            if i % 2 == 0:
+                digit_sum += n
+            elif n >= 5:
+                digit_sum += n * 2 - 9
+            else:
+                digit_sum += n * 2
+        
+        if digit_sum % 10 == 0:
             return True
         else:
             return False
